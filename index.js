@@ -68,87 +68,27 @@ function parse(_) {
         return rings;
     }
 
-    function coords() {
-        var list = [], item, pt;
-        while (pt =
-            $(/^[-+]?([0-9]*\.[0-9]+|[0-9]+)/) ||
-            $(/^(\,)/)) {
-            if (pt == ',') {
-                list.push(item);
-                item = [];
-            } else {
-                if (!item) item = [];
-                item.push(parseFloat(pt));
-            }
-            white();
-        }
-        if (item) list.push(item);
-        return list.length ? list : null;
-    }
-
-    function point() {
-        if (!$(/^(point)/i)) return null;
-        white();
-        if (!$(/^(\()/)) return null;
-        var c = coords();
-        white();
-        if (!$(/^(\))/)) return null;
-        return {
-            type: 'Point',
-            coordinates: c[0]
-        };
-    }
-
-    function multipoint() {
-        if (!$(/^(multipoint)/i)) return null;
-        white();
-        var c = multicoords();
-        white();
-        return {
-            type: 'MultiPoint',
-            coordinates: c
-        };
-    }
-
-    function multilinestring() {
-        if (!$(/^(multilinestring)/i)) return null;
-        white();
-        var c = multicoords();
-        white();
-        return {
-            type: 'MultiLineString',
-            coordinates: c
-        };
-    }
-
-    function linestring() {
-        if (!$(/^(linestring)/i)) return null;
-        white();
-        if (!$(/^(\()/)) return null;
-        var c = coords();
-        if (!$(/^(\))/)) return null;
-        return {
-            type: 'LineString',
-            coordinates: c
-        };
-    }
-
-    function polygon() {
-        if (!$(/^(polygon)/i)) return null;
-        white();
-        return {
-            type: 'Polygon',
-            coordinates: multicoords()
-        };
-    }
-
-    function multipolygon() {
-        if (!$(/^(multipolygon)/i)) return null;
-        white();
-        return {
-            type: 'MultiPolygon',
-            coordinates: multicoords()
-        };
+    function generic() {
+		var type;
+        if (type = $(/^(point|multipoint|multilinestring|linestring|polygon|multipolygon)/i)) {
+			type = {
+				point: 'Point',
+				multipoint: 'MultiPoint',
+				multilinestring: 'MultiLineString',
+				linestring: 'LineString',
+				polygon: 'Polygon',
+				multipolygon: 'MultiPolygon'
+			}[type.toLowerCase()];
+			var c = multicoords();
+			if (type == 'Point')
+				c = c[0];
+			white();
+			return {
+				type: type,
+				coordinates: c
+			};
+		}
+		return null;
     }
 
     function geometrycollection() {
@@ -173,12 +113,7 @@ function parse(_) {
     }
 
     function root() {
-        return point() ||
-            linestring() ||
-            polygon() ||
-            multipoint() ||
-            multilinestring() ||
-            multipolygon() ||
+        return generic() ||
             geometrycollection();
     }
 
