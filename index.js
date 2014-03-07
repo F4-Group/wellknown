@@ -132,8 +132,10 @@ function parse(_) {
         while (geometry = root()) {
             geometries.push(geometry);
             white();
-            if(_.charAt(i)) ++i;
-            white();
+            if (_.charAt(i) == ',') {
+                ++i;
+                white();
+            }
         }
         if (_.charAt(i) != ")") return null;
         ++i;
