@@ -49,7 +49,7 @@ function parse(_) {
     }
 
     function crs(obj) {
-        if (obj && srid.match(/\d+/)) {
+        if (obj && srid && !isNaN(parseInt(srid))) {
             obj.crs = {
                 type: 'name',
                 'properties': {
